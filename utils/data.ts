@@ -6,7 +6,7 @@ function count(array_elements: string[]) {
 
     const min = 0
 
-    const summary: { name: string; count: number; share: number }[] = []
+    const summary: { name: string; count: number }[] = []
     for (var i = 0; i < array_elements.length; i++) {
         if (array_elements[i] != current) {
             if (cnt > min && current) {
@@ -14,7 +14,6 @@ function count(array_elements: string[]) {
                 summary.push({
                     name: current,
                     count: cnt,
-                    share: (cnt * 100) / array_elements.length,
                 })
             }
             current = array_elements[i]
@@ -27,7 +26,6 @@ function count(array_elements: string[]) {
         summary.push({
             name: current,
             count: cnt,
-            share: (cnt * 100) / array_elements.length,
         })
     }
     return {
