@@ -1,3 +1,36 @@
+interface PlaylistResponse {
+    collaborative: boolean
+    description: string
+    external_urls: { spotify: string }
+    followers: { href: string | null; total: number }
+    href: string
+    id: string
+    images: PlaylistImage[]
+    name: string
+    owner: {
+        display_name: string
+        external_urls: { spotify: string }
+        href: string
+        id: string
+        type: string
+        uri: string
+    }
+    primary_color: string | null
+    public: boolean
+    snapshot_id: string
+    tracks: {
+        href: string
+        items: PlaylistItem[]
+        limit: number
+        next: string | null
+        offset: number
+        previous: string | null
+        total: number
+    }
+    type: string
+    uri: string
+}
+
 interface PlaylistItemResponse {
     href: string
     items: PlaylistItem[]
