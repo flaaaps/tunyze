@@ -13,15 +13,12 @@ type TrackFetchResponse =
 
 const AUTH_TOKEN = 'Bearer ' + process.env.AUTH_TOKEN
 
-export default async function handler(
-    req: NextApiRequest,
-    res: NextApiResponse
-) {
-    if (!req.query.playlistId) {
-        res.send({ success: false, error: 'Please include a playlistId' })
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+    const playlistId = req.query.id as string
+    if (!playlistId) {
+        res.send({ success: false, error: 'Please include a playlist id' })
         return
     }
-    const playlistId = req.query.playlistId as string
     const considerAllArtists = req.query.considerAllArtists
     logger.info("Starting to fetch playlists' tracks...")
     logger.info(
@@ -32,7 +29,6 @@ export default async function handler(
 
     let refetches = 0 // TODO: Instead compare total and fetched
     try {
-        console.log(await retrievePlaylistTracks(playlistId))
         const mainResult = await retrievePlaylistTracks(playlistId)
         if (mainResult.success == false) {
             res.send(mainResult)
@@ -57,87 +53,56 @@ export default async function handler(
             refetches -= 1
             offset += 100
         }
-        logger.info(
-            `We got ${items.length} items, the total is ${mainResult.total}`
-        )
+        logger.info(`We got ${items.length} items, the total is ${mainResult.total}`)
 
-        const cachedArtists: (PlaylistItemTrackArtist & {
-            genres: string[]
-        })[] = []
         const artists: { [key: string]: PlaylistItemTrackArtist[] } = {}
         items.forEach((item) => {
             artists[item.track.id] = item.track.artists
         })
-        const genreList: string[] = []
-        const neededToBeFetched: boolean[] = []
+        const artistIdsToFetch: string[] = []
         for (let trackId of Object.keys(artists)) {
             const artistList = artists[trackId]
             if (considerAllArtists) {
                 for (let artist of artistList) {
-                    if (
-                        !cachedArtists.find((item) => item.href === artist.href)
-                    ) {
-                        neededToBeFetched.push(true)
-                        const artistData: ArtistResponse = (
-                            await axios.get(artist.href, {
-                                headers: { Authorization: AUTH_TOKEN },
-                            })
-                        ).data
-                        cachedArtists.push(artistData)
-                    }
-                    genreList.push(
-                        ...cachedArtists.find(
-                            (item) => item.href === artistList[0].href
-                        )?.genres!
-                    )
+                    artistIdsToFetch.push(artist.id)
                 }
             } else {
-                if (
-                    !cachedArtists.find(
-                        (item) => item.href === artistList[0].href
-                    )
-                ) {
-                    neededToBeFetched.push(true)
-                    const artistData: ArtistResponse = (
-                        await axios.get(artistList[0].href, {
-                            headers: { Authorization: AUTH_TOKEN },
-                        })
-                    ).data
-                    cachedArtists.push(artistData)
-                }
-                genreList.push(
-                    ...cachedArtists.find(
-                        (item) => item.href === artistList[0].href
-                    )?.genres!
-                )
+                artistIdsToFetch.push(artistList[0].id)
             }
         }
-        const countedGenres = count(genreList)
-        console.log(`${cachedArtists.length} artists needed to be fetched!`)
-        console.log(
-            'The cached artists are:',
-            cachedArtists.map((artist) => artist.name).join(',')
-        )
-        logger.info('We are done fetching now!')
-        res.send({
-            success: true,
-            genres: countedGenres.items.slice(
-                0,
-                parseInt(req.query.limit as string) || 10
-            ),
-        })
+        const artistRes = (
+            await axios.get(
+                `https://api.spotify.com/v1/artists?ids=${encodeURIComponent(
+                    artistIdsToFetch.join(',')
+                )}`,
+                {
+                    headers: {
+                        Authorization: AUTH_TOKEN,
+                    },
+                }
+            )
+        ).data
+
+        if (artistRes?.artists) {
+            const artistObjects: ArtistResponse[] = artistRes.artists
+            const genreList: string[] = []
+
+            artistObjects.forEach((artist) => {
+                genreList.push(...artist.genres)
+            })
+            const countedGenres = count(genreList)
+            logger.info('We are done fetching now!')
+            res.send({
+                success: true,
+                genres: countedGenres.items.slice(0, parseInt(req.query.limit as string) || 10),
+            })
+        } else {
+            res.send({ success: false, error: 'An unexpected error occurred' })
+        }
     } catch (error) {
         res.send({ success: false, error: error.message })
         return
     }
-    // }
-    // console.log(req.query.playlistId, "PLAYLIST ID!")
-    // if (req.query.playlistId) {
-    //     fetchPlaylistTracks(req.query.playlistId as string)
-    // } else {
-    //     res.send({ success: false, error: "Missing playlist id" })
-    // }
-    // res.send("Fallback")
 }
 
 async function retrievePlaylistTracks(
@@ -159,6 +124,7 @@ async function retrievePlaylistTracks(
             )?.data,
         }
     } catch (error) {
-        return { success: false, ...error.response.data.error }
+        console.log('An error occurred!')
+        return { success: false, ...error.response.data.error, status: 'babas' }
     }
 }
