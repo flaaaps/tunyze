@@ -11,18 +11,12 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
             Authorization: `Bearer BQBliaiTWYyWiah-CQSKlFivLu-dBeNdsJvVdmQg7kR3hDlK0MRuFXr9tI7q4vu2I5kZpkbH4ZVHCAsUljl3DImv_LotSFrgv_2O_YdH89BD3RBypE2E15IPmxuXgY1m9Sp-TxXw2YVUCizYu7IubXZk7J0WphvtlALj1nktY5yJze5Z6gR4PzBJKG80IIujl1FAAUz_EdD9zZzVTWpMgJEZN4PJ-I8AwGTPv9ZrX5QJCTvwnbHZGNGvrKVLjeFps0rukGHEP93g705NUIsmYTikqjrr`,
         },
     })
-    const statusCode = res.ok ? 200 : res.ok
     let data = await res.json()
-
     let response = data
-
     if (data.error) {
-        if (data.error.status === 404) {
-            return {
-                notFound: true,
-            }
-        }
-        data.error.status = statusCode
+        if (data.error.status === 404) return { notFound: true }
+
+        data.error.status = res.ok ? 200 : res.ok
         response = data.error
     } else {
         data.status = 200
