@@ -39,6 +39,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 res.setHeader('Set-Cookie', [
                     serialize('token', JSON.stringify(tokenGrantData), {
                         path: '/',
+                        httpOnly: true,
                     }),
                 ])
                 res.redirect('/')
