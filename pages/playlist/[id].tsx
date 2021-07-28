@@ -3,34 +3,28 @@ import Error from 'next/error'
 import { useEffect, useState } from 'react'
 import extractColors from 'image-color-analyzer'
 import { GetServerSidePropsContext } from 'next'
+import { server } from '../../config'
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
-    const res = await fetch(`https://api.spotify.com/v1/playlists/${context.params!.id}`, {
+    const res = await fetch(`${server}/api/playlist/${context.params!.id}`, {
         method: 'GET',
         headers: {
-            Authorization: `Bearer BQBliaiTWYyWiah-CQSKlFivLu-dBeNdsJvVdmQg7kR3hDlK0MRuFXr9tI7q4vu2I5kZpkbH4ZVHCAsUljl3DImv_LotSFrgv_2O_YdH89BD3RBypE2E15IPmxuXgY1m9Sp-TxXw2YVUCizYu7IubXZk7J0WphvtlALj1nktY5yJze5Z6gR4PzBJKG80IIujl1FAAUz_EdD9zZzVTWpMgJEZN4PJ-I8AwGTPv9ZrX5QJCTvwnbHZGNGvrKVLjeFps0rukGHEP93g705NUIsmYTikqjrr`,
+            cookie: context.req.headers.cookie as string,
         },
     })
-    let data = await res.json()
-    let response = data
-    if (data.error) {
-        if (data.error.status === 404) return { notFound: true }
-
-        data.error.status = res.ok ? 200 : res.ok
-        response = data.error
-    } else {
-        data.status = 200
-    }
+    const data = await res.json()
 
     return {
         props: {
-            playlistResponse: response,
+            playlistResponse: { success: res.ok, ...data },
         },
     }
 }
 
 type Props = {
-    playlistResponse: (PlaylistResponse & { status: 200 }) | { status: 500; message: string }
+    playlistResponse:
+        | { success: true; status: number; data: PlaylistResponse }
+        | { success: false; status: number; message: string }
 }
 
 const Home: React.FC<Props> = ({ playlistResponse }) => {
@@ -45,7 +39,6 @@ const Home: React.FC<Props> = ({ playlistResponse }) => {
     const handleImageLoad = (event: React.SyntheticEvent<HTMLImageElement, Event>): void => {
         const target = event.target as HTMLImageElement
         if (target.complete && target.style.visibility !== 'hidden') {
-            console.log(target)
             setColors(
                 extractColors(target, {
                     amount: 5,
@@ -56,7 +49,7 @@ const Home: React.FC<Props> = ({ playlistResponse }) => {
     }
     return (
         <>
-            {playlistResponse.status !== 200 ? (
+            {!playlistResponse.success ? (
                 <Error statusCode={playlistResponse.status} title={playlistResponse.message} />
             ) : (
                 <>
@@ -66,7 +59,7 @@ const Home: React.FC<Props> = ({ playlistResponse }) => {
                         objectFit="cover"
                         width="150"
                         height="150"
-                        src={playlistResponse.images[0].url}
+                        src={playlistResponse.data.images[0].url}
                     />
 
                     {colors.map((color) => (
