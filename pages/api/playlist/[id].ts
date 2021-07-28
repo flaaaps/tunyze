@@ -1,11 +1,6 @@
 import axios from 'axios'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-export const redirectURI =
-    process.env.NODE_ENV === 'development'
-        ? 'http://localhost:3000/api/auth/callback'
-        : 'https://hardboun.de/api/auth/callback'
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method === 'GET') {
         const { id } = req.query
