@@ -13,10 +13,15 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
         },
     })
     const data = await res.json()
-
     return {
         props: {
-            playlistResponse: { success: res.ok, ...data },
+            playlistResponse: res.ok
+                ? { success: res.ok, ...data }
+                : {
+                      success: false,
+                      status: res.status,
+                      message: data?.message ?? 'Internal server error',
+                  },
         },
     }
 }
