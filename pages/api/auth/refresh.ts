@@ -40,12 +40,9 @@ export async function refreshAccessToken(
             }
         )
     ).data
-    console.log(tokenGrantData, 'TOKEN GRANT DATA!')
     if (!tokenGrantData) {
-        // res.send({ success: false, error: 'Authentication failed' })
         return { success: false, error: 'Authentication failed' }
     } else {
-        // res.send({ success: true, ...tokenGrantData })
         return { success: true, ...tokenGrantData }
     }
 }
