@@ -3,14 +3,15 @@ import { serialize } from 'cookie'
 import type { GetServerSidePropsContext, NextApiRequest, NextApiResponse } from 'next'
 import { refreshAccessToken } from './refresh'
 
-export const redirectURI =
-    process.env.NODE_ENV === 'development'
-        ? 'http://localhost:3000/api/auth/callback'
-        : 'https://hardboun.de/api/auth/callback'
+export const redirectURI = 'https://callback.wening.me'
 
-export default function handler(_: NextApiRequest, res: NextApiResponse) {
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
     res.redirect(
-        `https://accounts.spotify.com/authorize?client_id=${process.env.SPOTIFY_CLIENT_ID}&response_type=code&redirect_uri=${redirectURI}`
+        `https://accounts.spotify.com/authorize?client_id=${
+            process.env.SPOTIFY_CLIENT_ID
+        }&response_type=code&redirect_uri=${redirectURI}&state=${
+            req.headers.referer || 'http://' + req.headers.host + '/'
+        }api/auth/callback`
     )
 }
 
