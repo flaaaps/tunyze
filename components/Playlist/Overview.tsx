@@ -1,14 +1,14 @@
 import classNames from 'classnames'
 import Image from 'next/image'
 import React from 'react'
-import CardWrapper from './CardWrapper'
-import PlaylistInfoList from './PlaylistInfoList'
+import CardWrapper from '../CardWrapper'
+import StatsItemList from './StatsItemList'
 
 type Props = {
     playlistData: PlaylistResponse
 }
 
-const PlaylistOverview: React.FC<Props> = ({ playlistData }) => {
+const Overview: React.FC<Props> = ({ playlistData }) => {
     return (
         <CardWrapper className="mt-8 mx-10">
             <div className="flex">
@@ -38,7 +38,7 @@ const PlaylistOverview: React.FC<Props> = ({ playlistData }) => {
                     >
                         {playlistData.description || 'Playlist has no description'}
                     </p>
-                    <PlaylistInfoList
+                    <StatsItemList
                         owner={playlistData.owner.display_name}
                         followerCount={new Intl.NumberFormat('en-US').format(
                             playlistData.followers.total
@@ -51,4 +51,4 @@ const PlaylistOverview: React.FC<Props> = ({ playlistData }) => {
     )
 }
 
-export default PlaylistOverview
+export default Overview

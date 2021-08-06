@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import extractColors from 'image-color-analyzer'
 import { GetServerSidePropsContext } from 'next'
 import { fetchPlaylistById } from '../../lib/api'
-import PlaylistOverview from '../../components/PlaylistOverview'
+import PlaylistOverview from '../../components/Playlist/Overview'
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
     const playlistData = await fetchPlaylistById(context)

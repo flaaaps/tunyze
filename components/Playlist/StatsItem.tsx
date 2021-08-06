@@ -7,7 +7,7 @@ interface Props {
     label: string | number
 }
 
-const PlaylistInfoItem: React.FC<Props> = ({ iconPath, alt, label }) => {
+const StatsItem: React.FC<Props> = ({ iconPath, alt, label }) => {
     return (
         <div className="flex items-center mr-5">
             <div className="mr-1 h-5">
@@ -18,4 +18,4 @@ const PlaylistInfoItem: React.FC<Props> = ({ iconPath, alt, label }) => {
     )
 }
 
-export default PlaylistInfoItem
+export default StatsItem
