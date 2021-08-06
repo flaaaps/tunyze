@@ -3,6 +3,7 @@ import Image from 'next/image'
 import React from 'react'
 import CardWrapper from '../CardWrapper'
 import StatsItemList from './StatsItemList'
+import '../../utils/number'
 
 type Props = {
     playlistData: PlaylistResponse
@@ -10,7 +11,7 @@ type Props = {
 
 const Overview: React.FC<Props> = ({ playlistData }) => {
     return (
-        <CardWrapper className="mt-8 mx-10">
+        <CardWrapper className="xl:col-span-4 col-span-6">
             <div className="flex">
                 <div
                     style={{
@@ -20,7 +21,7 @@ const Overview: React.FC<Props> = ({ playlistData }) => {
                     }}
                 >
                     <Image
-                        alt="Test"
+                        alt="Playlist Image"
                         className="rounded-l-sm"
                         objectFit="cover"
                         layout="fill"
@@ -40,9 +41,7 @@ const Overview: React.FC<Props> = ({ playlistData }) => {
                     </p>
                     <StatsItemList
                         owner={playlistData.owner.display_name}
-                        followerCount={new Intl.NumberFormat('en-US').format(
-                            playlistData.followers.total
-                        )}
+                        followerCount={playlistData.followers.total.format('en-US')}
                         trackCount={playlistData.tracks.total}
                     />
                 </div>
