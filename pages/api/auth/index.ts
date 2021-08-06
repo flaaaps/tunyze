@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { serialize } from 'cookie'
-import type { NextApiRequest, NextApiResponse } from 'next'
+import type { GetServerSidePropsContext, NextApiRequest, NextApiResponse } from 'next'
 import { refreshAccessToken } from './refresh'
 
 export const redirectURI =
@@ -14,7 +14,10 @@ export default function handler(_: NextApiRequest, res: NextApiResponse) {
     )
 }
 
-export async function validationMiddleware(req: NextApiRequest, res: NextApiResponse) {
+export async function validationMiddleware(
+    req: NextApiRequest | GetServerSidePropsContext['req'],
+    res: NextApiResponse | GetServerSidePropsContext['res']
+) {
     if (req.cookies.token) {
         let { access_token, refresh_token } = JSON.parse(req.cookies.token)
 
@@ -39,7 +42,6 @@ export async function validationMiddleware(req: NextApiRequest, res: NextApiResp
                 )
             }
         }
-        res.setHeader('Set-Cookie', serialize('testy', 'tadaaa'))
         req.cookies.access_token = access_token
     }
 }
