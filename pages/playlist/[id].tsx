@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import extractColors from 'image-color-analyzer'
 import { GetServerSidePropsContext } from 'next'
 import { fetchPlaylistById } from '../../lib/api'
+import PlaylistOverview from '../../components/PlaylistOverview'
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
     const playlistData = await fetchPlaylistById(context)
@@ -47,16 +48,8 @@ const Home: React.FC<Props> = ({ playlistData }) => {
             {!playlistData.success ? (
                 <Error statusCode={playlistData.status} title={playlistData.message} />
             ) : (
-                <>
-                    <Image
-                        onLoad={handleImageLoad}
-                        alt="Test"
-                        objectFit="cover"
-                        width="150"
-                        height="150"
-                        src={playlistData.data.images[0].url}
-                    />
-
+                <div className="w-10/12 mx-auto">
+                    <PlaylistOverview playlistData={playlistData.data} />
                     {colors.map((color) => (
                         <div
                             key={color.color}
@@ -68,7 +61,7 @@ const Home: React.FC<Props> = ({ playlistData }) => {
                             }}
                         ></div>
                     ))}
-                </>
+                </div>
             )}
         </>
     )
