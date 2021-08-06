@@ -184,3 +184,25 @@ interface ArtistResponse {
     type: string
     uri: string
 }
+
+interface User {
+    display_name: string
+    external_urls: {
+        spotify: string
+    }
+    followers: {
+        href: string | null
+        total: number
+    }
+    href: string
+    id: string
+    images: [
+        {
+            height: null
+            url: string
+            width: null
+        }
+    ]
+    type: 'user'
+    uri: string
+}
