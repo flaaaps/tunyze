@@ -3,38 +3,33 @@ import Error from 'next/error'
 import { useEffect, useState } from 'react'
 import extractColors from 'image-color-analyzer'
 import { GetServerSidePropsContext } from 'next'
-import { server } from '../../config'
+import { fetchPlaylistById } from '../../lib/api'
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
-    const res = await fetch(`${server}/api/playlist/${context.params!.id}`, {
-        method: 'GET',
-        headers: {
-            cookie: context.req.headers.cookie as string,
-        },
-    })
-    const data = await res.json()
-
+    const playlistData = await fetchPlaylistById(context)
     return {
         props: {
-            playlistResponse: { success: res.ok, ...data },
+            playlistData,
         },
     }
 }
 
+type PlaylistDataProps =
+    | { success: true; status: number; data: PlaylistResponse }
+    | { success: false; status: number; message: string }
+
 type Props = {
-    playlistResponse:
-        | { success: true; status: number; data: PlaylistResponse }
-        | { success: false; status: number; message: string }
+    playlistData: PlaylistDataProps
 }
 
-const Home: React.FC<Props> = ({ playlistResponse }) => {
+const Home: React.FC<Props> = ({ playlistData }) => {
     const [imgLoaded, setImgLoaded] = useState(false)
     const [colors, setColors] = useState<{ color: string; share: number }[]>([])
 
     useEffect(() => {
         console.log(imgLoaded ? 'Image now fully loaded' : 'Still loading image')
-        console.log(playlistResponse)
-    }, [imgLoaded, playlistResponse])
+        console.log(playlistData)
+    }, [imgLoaded, playlistData])
 
     const handleImageLoad = (event: React.SyntheticEvent<HTMLImageElement, Event>): void => {
         const target = event.target as HTMLImageElement
@@ -49,8 +44,8 @@ const Home: React.FC<Props> = ({ playlistResponse }) => {
     }
     return (
         <>
-            {!playlistResponse.success ? (
-                <Error statusCode={playlistResponse.status} title={playlistResponse.message} />
+            {!playlistData.success ? (
+                <Error statusCode={playlistData.status} title={playlistData.message} />
             ) : (
                 <>
                     <Image
@@ -59,7 +54,7 @@ const Home: React.FC<Props> = ({ playlistResponse }) => {
                         objectFit="cover"
                         width="150"
                         height="150"
-                        src={playlistResponse.data.images[0].url}
+                        src={playlistData.data.images[0].url}
                     />
 
                     {colors.map((color) => (
