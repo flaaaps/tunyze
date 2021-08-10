@@ -1,15 +1,21 @@
-import Image from 'next/image'
 import Error from 'next/error'
 import { useEffect, useState } from 'react'
 import extractColors from 'image-color-analyzer'
 import { GetServerSidePropsContext } from 'next'
 import { fetchPlaylistById } from '../../lib/api'
+import Overview from '../../components/Playlist/Overview'
+import OwnerInfo from '../../components/Playlist/OwnerInfo'
+import { fetchUserInfo } from '../../lib/api/fetchUserInfo'
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
     const playlistData = await fetchPlaylistById(context)
+    const ownerInfo = playlistData.success
+        ? await fetchUserInfo(context, playlistData.data.owner.href)
+        : playlistData
     return {
         props: {
             playlistData,
+            ownerInfo,
         },
     }
 }
@@ -17,14 +23,18 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 type PlaylistDataProps =
     | { success: true; status: number; data: PlaylistResponse }
     | { success: false; status: number; message: string }
-
+export type PlaylistOwner =
+    | { success: true; status: number; data: User }
+    | { success: false; status: number; message: string }
 type Props = {
     playlistData: PlaylistDataProps
+    ownerInfo: PlaylistOwner
 }
 
-const Home: React.FC<Props> = ({ playlistData }) => {
+const Home: React.FC<Props> = ({ playlistData, ownerInfo }) => {
     const [imgLoaded, setImgLoaded] = useState(false)
     const [colors, setColors] = useState<{ color: string; share: number }[]>([])
+    const error = !ownerInfo.success ? ownerInfo : !playlistData.success ? playlistData : null
 
     useEffect(() => {
         console.log(imgLoaded ? 'Image now fully loaded' : 'Still loading image')
@@ -44,20 +54,11 @@ const Home: React.FC<Props> = ({ playlistData }) => {
     }
     return (
         <>
-            {!playlistData.success ? (
-                <Error statusCode={playlistData.status} title={playlistData.message} />
-            ) : (
-                <>
-                    <Image
-                        onLoad={handleImageLoad}
-                        alt="Test"
-                        objectFit="cover"
-                        width="150"
-                        height="150"
-                        src={playlistData.data.images[0].url}
-                    />
-
-                    {colors.map((color) => (
+            {playlistData.success && ownerInfo.success ? (
+                <div className="w-10/12 mx-auto grid lg:grid-cols-6 md:grid-cols-5 grid-cols-4 grid-rows-2 gap-10 mt-8">
+                    <Overview playlistData={playlistData.data} />
+                    <OwnerInfo owner={ownerInfo.data} />
+                    {/* {colors.map((color) => (
                         <div
                             key={color.color}
                             style={{
@@ -67,8 +68,10 @@ const Home: React.FC<Props> = ({ playlistData }) => {
                                 backgroundColor: `rgb(${color.color})`,
                             }}
                         ></div>
-                    ))}
-                </>
+                    ))} */}
+                </div>
+            ) : (
+                error && <Error statusCode={error.status} title={error.message} />
             )}
         </>
     )

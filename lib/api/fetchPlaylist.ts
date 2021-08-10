@@ -8,7 +8,11 @@ export async function fetchPlaylistById({ req, res, params }: GetServerSideProps
     const { access_token } = req.cookies
     const id = params?.id
     if (!access_token) {
-        return { status: 401, message: 'Unauthorized. Sign In with Spotify to continue' }
+        return {
+            success: false,
+            status: 401,
+            message: 'Unauthorized. Sign In with Spotify to continue',
+        }
     }
 
     const response = await executeRequest(
@@ -18,7 +22,7 @@ export async function fetchPlaylistById({ req, res, params }: GetServerSideProps
     return { ...response }
 }
 
-async function executeRequest(access_token: string, href: string) {
+export async function executeRequest(access_token: string, href: string) {
     try {
         const response = await axios.get(href, {
             method: 'GET',
@@ -29,7 +33,7 @@ async function executeRequest(access_token: string, href: string) {
         let data = response.data
         return { data, status: response.status, success: true }
     } catch (error) {
-        console.log('Error while fetching playlist!')
+        console.log('Error while fetching data!')
         if (error.response) {
             return {
                 success: false,

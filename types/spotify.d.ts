@@ -5,7 +5,7 @@ interface PlaylistResponse {
     followers: { href: string | null; total: number }
     href: string
     id: string
-    images: PlaylistImage[]
+    images: PlaylistImages
     name: string
     owner: {
         display_name: string
@@ -139,6 +139,23 @@ interface PlaylistItemTrackArtist {
     uri: string
 }
 
+type PlaylistImages = [
+    {
+        height: 640
+        url: string
+        width: 640
+    },
+    {
+        height: 300
+        url: string
+        width: 300
+    },
+    {
+        height: 64
+        url: string
+        width: 64
+    }
+]
 interface ArtistResponse {
     external_urls: { spotify: string }
     followers: { href: string | null; total: number }
@@ -165,5 +182,27 @@ interface ArtistResponse {
     name: string
     popularity: number
     type: string
+    uri: string
+}
+
+interface User {
+    display_name: string
+    external_urls: {
+        spotify: string
+    }
+    followers: {
+        href: string | null
+        total: number
+    }
+    href: string
+    id: string
+    images: [
+        {
+            height: null
+            url: string
+            width: null
+        }
+    ]
+    type: 'user'
     uri: string
 }
