@@ -1,17 +1,21 @@
 import Error from 'next/error'
 import { useEffect, useState } from 'react'
 import extractColors from 'image-color-analyzer'
-import { GetServerSidePropsContext } from 'next'
+import { GetServerSideProps } from 'next'
 import { fetchPlaylistById } from '../../lib/api'
 import Overview from '../../components/Playlist/Overview'
 import OwnerInfo from '../../components/Playlist/OwnerInfo'
 import { fetchUserInfo } from '../../lib/api/fetchUserInfo'
+import { validationMiddleware } from '../api/auth'
 
-export async function getServerSideProps(context: GetServerSidePropsContext) {
+export const getServerSideProps: GetServerSideProps = async (context) => {
+    await validationMiddleware(context.req, context.res)
     const playlistData = await fetchPlaylistById(context)
-    const ownerInfo = playlistData.success
+
+    let ownerInfo = playlistData.success
         ? await fetchUserInfo(context, playlistData.data.owner.href)
         : playlistData
+
     return {
         props: {
             playlistData,
@@ -20,15 +24,13 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     }
 }
 
-type PlaylistDataProps =
-    | { success: true; status: number; data: PlaylistResponse }
+export type DataResponse<T> =
+    | { success: true; status: number; data: T }
     | { success: false; status: number; message: string }
-export type PlaylistOwner =
-    | { success: true; status: number; data: User }
-    | { success: false; status: number; message: string }
+
 type Props = {
-    playlistData: PlaylistDataProps
-    ownerInfo: PlaylistOwner
+    playlistData: DataResponse<PlaylistResponse>
+    ownerInfo: DataResponse<User>
 }
 
 const Home: React.FC<Props> = ({ playlistData, ownerInfo }) => {
