@@ -1,10 +1,11 @@
 import { GetServerSidePropsContext } from 'next'
-import { validationMiddleware } from '../../pages/api/auth'
-import { executeRequest } from './fetchPlaylist'
+import { DataResponse } from '../../pages/playlist/[id]'
+import { executeRequest } from './utils'
 
-export async function fetchUserInfo({ req, res }: GetServerSidePropsContext, href: string) {
-    await validationMiddleware(req, res)
-
+export async function fetchUserInfo(
+    { req }: GetServerSidePropsContext,
+    href: string
+): Promise<DataResponse<User>> {
     const { access_token } = req.cookies
     if (!access_token) {
         return {
@@ -14,6 +15,6 @@ export async function fetchUserInfo({ req, res }: GetServerSidePropsContext, hre
         }
     }
 
-    const response = await executeRequest(access_token, href)
+    const response = await executeRequest<User>(access_token, href)
     return { ...response }
 }
