@@ -9,7 +9,7 @@ const ENV = process.env.NODE_ENV
 const logger = new Logger(ENV === 'test' ? 'development' : ENV, 'all')
 
 type TrackFetchResponse =
-    | (PlaylistItemResponse & { success: true })
+    | (PlaylistItemsResponse & { success: true })
     | { success: false; status: number; message: string }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

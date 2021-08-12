@@ -31,7 +31,7 @@ interface PlaylistResponse {
     uri: string
 }
 
-interface PlaylistItemResponse {
+interface PlaylistItemsResponse {
     href: string
     items: PlaylistItem[]
     limit: number
